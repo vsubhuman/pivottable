@@ -48,6 +48,8 @@ public class PivotTableConverter {
 		int sourceSheet = table.getSourceSheet();
 		if (sourceSheet >= 0)
 			source.setSheet(sourceSheet);
+		else
+			sourceSheet = source.getSheet();
 		
 		TableRange sourceRange = table.getSourceRange();
 		if (sourceRange == null)
@@ -57,17 +59,8 @@ public class PivotTableConverter {
 		
 		BookPivotRangeModel pmodel = source.getPivotModel();
 		pmodel.setList(range);
-		
-		TableSheet targetSheet = table.getTargetSheet();
+
 		TableCell targetCell = table.getTargetCell();
-		
-		int targetIndex = 0;
-		if (targetSheet != null) {
-			
-			int idx = targetSheet.getIndex();
-			if (idx >= 0)
-				targetIndex = idx;
-		}
 		
 		int targetRow = 0, targetCol = 0;
 		if (targetCell != null) {
@@ -92,10 +85,12 @@ public class PivotTableConverter {
 		 */
 		targetRow += 2;
 		
-		pmodel.setLocation(targetIndex, targetRow, targetCol);
+		pmodel.setLocation(0, targetRow, targetCol);
 
-		if (targetSheet != null && targetSheet.getName() != null)
-			source.setSheetName(targetIndex, targetSheet.getName());
+		String name = table.getName();
+		if (name != null) {
+			source.setSheetName(0, name);
+		}
 
 		source.setSelection(targetRow, targetCol, targetRow, targetCol);
 
@@ -246,18 +241,6 @@ public class PivotTableConverter {
 					startColumn++;
 			}
 		}
-		
-		if (targetSheet != null) {
-			
-			source.setShowGridLines(targetSheet.isShowGridLines());
-			source.setShowOutlines(targetSheet.isShowOutlines());
-			source.setShowRowColHeader(targetSheet.isShowRowColHeader());
-			source.setShowZeroValues(targetSheet.isShowZeroValues());
-		}
-	}
-	
-	public static void main(String[] args) {
-		
 	}
 	
 	public static final Comparator<PivotField> COMPARE_BY_AREA =

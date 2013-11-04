@@ -52,6 +52,7 @@ public class XMLProvider implements ConfigurationProvider {
 	public static final String AT_SHOW_ROWBUTTONS = "show-rowbuttons";
 	public static final String AT_SHOW_TOTALCOL = "show-totalcol"; 
 	public static final String AT_SHOW_TOTALROW = "show-totalrow"; 
+	public static final String AT_DELETE_SOURCE_SHEET = "delete-source-sheet"; 
 	
 	public static final String AT_DATA_CAPTION = "show-totalrow"; 
 	
@@ -153,25 +154,12 @@ public class XMLProvider implements ConfigurationProvider {
 		}
 
 		/*
-		 * Target sheet
+		 * Name
 		 */
 		
-		TableSheet targetSheet = table.getTargetSheet();
-		if (targetSheet != null) {
-			
-			int targetIndex = targetSheet.getIndex();
-			if (targetIndex >= 0)
-				root.setAttribute(AT_TARGET_SHEET, String.valueOf(targetIndex));
-			
-			String name = targetSheet.getName();
-			if (name != null)
-				root.setAttribute(AT_TARGET_NAME, name);
-			
-			root.setAttribute(AT_TARGET_SHOW_GRID, String.valueOf(targetSheet.isShowGridLines()));
-			root.setAttribute(AT_TARGET_SHOW_OUTLINES, String.valueOf(targetSheet.isShowOutlines()));
-			root.setAttribute(AT_TARGET_SHOW_ROWCOLHEADER, String.valueOf(targetSheet.isShowRowColHeader()));
-			root.setAttribute(AT_TARGET_SHOW_ZEROVALUES, String.valueOf(targetSheet.isShowZeroValues()));
-		}
+		String name = table.getName();
+		if (name != null)
+			root.setAttribute(AT_TARGET_NAME, name);
 		
 		/*
 		 * Target cell
@@ -350,42 +338,14 @@ public class XMLProvider implements ConfigurationProvider {
 			table.setSourceRange(sourceRange);
 
 		/*
-		 * Target sheet
+		 * Name
 		 */
-		
-		TableSheet targetSheet = new TableSheet();
-		
-		String targetIndexStr = root.getAttribute(AT_TARGET_SHEET).trim();
-		if (!targetIndexStr.isEmpty())
-			targetSheet.setIndex(parseInteger(AT_TARGET_SHEET, targetIndexStr));
 		
 		if (root.hasAttribute(AT_TARGET_NAME)) {
 			
 			String name = root.getAttribute(AT_TARGET_NAME).trim();
-			targetSheet.setName(name);
+			table.setName(name);
 		}
-
-		if (root.hasAttribute(AT_TARGET_SHOW_GRID))
-			targetSheet.setShowGridLines(
-					parseBoolean(AT_TARGET_SHOW_GRID,
-							root.getAttribute(AT_TARGET_SHOW_GRID)));
-		
-		if (root.hasAttribute(AT_TARGET_SHOW_OUTLINES))
-			targetSheet.setShowOutlines(
-					parseBoolean(AT_TARGET_SHOW_OUTLINES,
-							root.getAttribute(AT_TARGET_SHOW_OUTLINES)));
-		
-		if (root.hasAttribute(AT_TARGET_SHOW_ROWCOLHEADER))
-			targetSheet.setShowRowColHeader(
-					parseBoolean(AT_TARGET_SHOW_ROWCOLHEADER,
-							root.getAttribute(AT_TARGET_SHOW_ROWCOLHEADER)));
-		
-		if (root.hasAttribute(AT_TARGET_SHOW_ZEROVALUES))
-			targetSheet.setShowZeroValues(
-					parseBoolean(AT_TARGET_SHOW_ZEROVALUES,
-							root.getAttribute(AT_TARGET_SHOW_ZEROVALUES)));
-		
-		table.setTargetSheet(targetSheet);
 		
 		/*
 		 * Target cell

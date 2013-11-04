@@ -1,19 +1,65 @@
 package com.vsubhuman.smartxls;
 
+import java.beans.Beans;
+import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 import com.smartxls.enums.PivotBuiltInStyles;
 
+/**
+ * <p>This class is the central core of "pivot table framework".<br>
+ * PivotTable is the entity of <b>configuration</b> of future converting
+ * of a simple table into pivot one.</p>
+ * 
+ * <p>In other words, this configuration describes <b>how</b> one table
+ * will be converted into another one, and not the table itself.</p>
+ * 
+ * <p>This class describes resulting pivot table. It provides functionality to
+ * set lots of parameters of the future table. Also it contains information
+ * about source table, used to build pivot table.</p>
+ * 
+ * <p>Example:<pre>
+ * PivotTable table = new PivotTable();
+ * table.setName("Pivot example");
+ * table.setShowHeader(false);
+ * table.addField(new PivotField(PivotArea.PAGE, "Pages"));
+ * 
+ * PivotTable table1 = new PivotTable("Pivot example");
+ * 
+ * PivotTable table2 = new PivotTable("Pivot example", "A1:D12");
+ * 
+ * PivotTable table3 = new PivotTable("Pivot example", "A1:D12", 1);
+ * </pre>
+ * 
+ * <p>Described "table" will be placed on a new sheet with the name "Pivot example".
+ * The header of the pivot table will not be shown. And it will have 1 field
+ * in the "page" area, builded upon column "Pages" from a source table.</p>
+ * 
+ * <p>Table "table1" gets name of the sheet right in the constructor.</p>
+ * <p>Table "table2" the same as "table1" but also will use only range "A1:D12" as source.</p>
+ * <p>Table "table3" the same as "table2" but also will use sheet by index 1 as source.</p>
+ * 
+ * <p>Read also about used in example class {@link PivotField}.</p>
+ * 
+ * @author vsubhuman
+ * @version 1.0
+ */
 public class PivotTable {
 
+	/*
+	 * Two fields describes source and target document
+	 * of this configuration
+	 */
 	private Document sourceDocument;
 	private Document targetDocument;
-	
+
+	// index of the sheet in the source document
 	private int sourceSheet = -1;
 	private TableRange sourceRange;
 	
-	private TableSheet targetSheet;
+	private String name;
 	private TableCell targetCell;
 	
 	private List<PivotField> fields;
@@ -32,30 +78,21 @@ public class PivotTable {
 		this(null);
 	}
 	
-	public PivotTable(String sourceRange) {
+	public PivotTable(String name) {
 		
-		this((String) null, sourceRange);
+		this(name, (TableRange) null, -1);
 	}
 	
 	public PivotTable(String name, String sourceRange) {
 		
-		this(0, name, sourceRange);
+		this(name, sourceRange == null ? null : new TableRange(sourceRange), -1);
 	}
 	
-	public PivotTable(int targetIndex, String name, String sourceRange) {
-		
-		this(new TableSheet(targetIndex, name), sourceRange);
-	}
-	
-	public PivotTable(TableSheet target, String sourceRange) {
-		
-		this(target, sourceRange == null ? null : new TableRange(sourceRange));
-	}
-	
-	public PivotTable(TableSheet target, TableRange source) {
-		
-		this.targetSheet = target;
+	public PivotTable(String name, TableRange source, int sourceSheet) {
+
+		this.name = name;
 		this.sourceRange = source;
+		this.sourceSheet = sourceSheet;
 		this.fields = new ArrayList<PivotField>();
 	}
 	
@@ -83,20 +120,12 @@ public class PivotTable {
 		this.sourceRange = sourceRange;
 	}
 
-	public TableSheet getTargetSheet() {
-		return targetSheet;
+	public String getName() {
+		return name;
 	}
 	
-	public void setTargetSheet(String name) {
-		setTargetSheet(0, name);
-	}
-	
-	public void setTargetSheet(int index, String name) {
-		setTargetSheet(new TableSheet(index, name));
-	}
-	
-	public void setTargetSheet(TableSheet targetSheet) {
-		this.targetSheet = targetSheet;
+	public void setName(String name) {
+		this.name = name;
 	}
 	
 	public TableCell getTargetCell() {
@@ -198,7 +227,7 @@ public class PivotTable {
 	public void setShowTotalCol(boolean showTotalCol) {
 		this.showTotalCol = showTotalCol;
 	}
-
+	
 	public String getDataCaption() {
 		return dataCaption;
 	}

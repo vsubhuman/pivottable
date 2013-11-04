@@ -1,5 +1,6 @@
 package com.vsubhuman.smartxls;
 
+import com.smartxls.WorkBook;
 import com.smartxls.enums.PivotBuiltInStyles;
 
 public class Test {
@@ -10,14 +11,20 @@ public class Test {
 		
 		XMLProvider prov = new XMLProvider();
 		
-		PivotTable table = prov.loadConfiguration("table.xml"); 
-		System.out.println("imported");
+//		PivotTable table = prov.loadConfiguration("table.xml"); 
+//		System.out.println("imported");
 		
-//		PivotTable table = createTable();
-//		System.out.println("table created");
+		PivotTable table = createTable();
+		table.setSourceSheet(0);
+		System.out.println("table created");
 		
-		PivotTableConverter.convert(table);
+		WorkBook wb = table.getSourceDocument().read();
+		wb.insertSheets(1, 1);
+		PivotTableConverter.convert(wb, table);
 		System.out.println("table converted");
+		
+		table.getTargetDocument().write(wb);
+		System.out.println("writed");
 		
 //		prov.saveConfiguration("table.xml", table);
 //		System.out.println("exported");
@@ -29,7 +36,7 @@ public class Test {
 		table.setSourceDocument(DocumentFormat.XLSX, "table_b.xlsx");
 		table.setTargetDocument(DocumentFormat.XLSX, "table_b1.xlsx");
 		
-		table.setTargetSheet("PIVOT TABLE");
+		table.setName("PIVOT TABLE");
 		table.setStyle(PivotBuiltInStyles.PivotStyleMedium4);
 
 		table.addField(new PivotField(PivotArea.PAGE, "Points"));
