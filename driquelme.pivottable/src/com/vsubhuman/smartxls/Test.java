@@ -1,6 +1,5 @@
 package com.vsubhuman.smartxls;
 
-import com.smartxls.WorkBook;
 import com.smartxls.enums.PivotBuiltInStyles;
 
 public class Test {
@@ -8,6 +7,9 @@ public class Test {
 	public static void main(String[] args) throws Exception {
 		
 		PivotTable table = new PivotTable();
+		table.setSourceDocument(DocumentFormat.XLSX, "table_b.xlsx");
+		table.setTargetDocument(DocumentFormat.XLSX, "table_b1.xlsx");
+		
 		table.setTargetSheet("PIVOT TABLE");
 		table.setStyle(PivotBuiltInStyles.PivotStyleMedium4);
 
@@ -33,12 +35,7 @@ public class Test {
 		
 		table.addField(new FormulaField(formula, "WOI.", "0.00")).setColumnWidth(50);
 		
-		WorkBook wb = new WorkBook();
-		wb.readXLSX("table_b.xlsx");
-		
-		PivotTableConverter.convert(wb, table);
-		
-		wb.writeXLSX("table_b1.xlsx");
+		PivotTableConverter.convert(table);
 		
 		System.out.println(1);
 	}

@@ -15,6 +15,28 @@ public class PivotTableConverter {
 
 	public static final int WIDTH_MILTIPLIER = 37;
 	
+	public static WorkBook convert(PivotTable table) throws Exception {
+		
+		if (table == null)
+			throw new IllegalArgumentException("Pivot table cannot be null!");
+
+		Document sourceDocument = table.getSourceDocument();
+		Document targetDocument = table.getTargetDocument();
+		
+		if (sourceDocument == null)
+			throw new IllegalStateException(
+					"Cannot convert table without source settings!");
+		
+		WorkBook wb = sourceDocument.read();
+		
+		convert(wb, table);
+		
+		if (targetDocument != null)
+			targetDocument.write(wb);
+		
+		return wb;
+	}
+	
 	public static void convert(WorkBook source, PivotTable table) throws Exception {
 
 		if (source == null)
@@ -197,8 +219,6 @@ public class PivotTableConverter {
 			int width = f.getColumnWidth();
 			if (width < 0)
 				continue;
-
-			System.out.println("set wid: " + column + " = " + width);
 
 			int startColumn = column;
 			int lastColumn = column;

@@ -7,6 +7,9 @@ import com.smartxls.enums.PivotBuiltInStyles;
 
 public class PivotTable {
 
+	private Document sourceDocument;
+	private Document targetDocument;
+	
 	private int sourceSheet = -1;
 	private TableRange sourceRange;
 	
@@ -202,5 +205,29 @@ public class PivotTable {
 
 	public void setDataCaption(String dataCaption) {
 		this.dataCaption = dataCaption;
+	}
+
+	public Document getSourceDocument() {
+		return sourceDocument;
+	}
+	
+	public void setSourceDocument(Document sourceDocument) {
+		this.sourceDocument = sourceDocument;
+	}
+	
+	public void setSourceDocument(DocumentFormat format, String path) {
+		this.sourceDocument = new Document(format, path);
+	}
+	
+	public Document getTargetDocument() {
+		return targetDocument;
+	}
+	
+	public void setTargetDocument(Document targetDocument) {
+		this.targetDocument = targetDocument;
+	}
+	
+	public void setTargetDocument(DocumentFormat format, String path) {
+		this.targetDocument = new Document(format, path);
 	}
 }
