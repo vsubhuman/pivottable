@@ -41,6 +41,9 @@ public class TableCell {
 		return col;
 	}
 	
+	/*
+	 * If isNumbers = false can call with wb = null!
+	 */
 	public String getCell(WorkBook wb) throws Exception {
 		
 		if (cell != null)

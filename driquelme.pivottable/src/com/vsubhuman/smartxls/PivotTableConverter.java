@@ -62,8 +62,12 @@ public class PivotTableConverter {
 		TableCell targetCell = table.getTargetCell();
 		
 		int targetIndex = 0;
-		if (targetSheet != null)
-			targetIndex = targetSheet.getIndex();
+		if (targetSheet != null) {
+			
+			int idx = targetSheet.getIndex();
+			if (idx >= 0)
+				targetIndex = idx;
+		}
 		
 		int targetRow = 0, targetCol = 0;
 		if (targetCell != null) {
@@ -243,10 +247,13 @@ public class PivotTableConverter {
 			}
 		}
 		
-		source.setShowGridLines(targetSheet.isShowGridLines());
-		source.setShowOutlines(targetSheet.isShowOutlines());
-		source.setShowRowColHeader(targetSheet.isShowRowColHeader());
-		source.setShowZeroValues(targetSheet.isShowZeroValues());
+		if (targetSheet != null) {
+			
+			source.setShowGridLines(targetSheet.isShowGridLines());
+			source.setShowOutlines(targetSheet.isShowOutlines());
+			source.setShowRowColHeader(targetSheet.isShowRowColHeader());
+			source.setShowZeroValues(targetSheet.isShowZeroValues());
+		}
 	}
 	
 	public static void main(String[] args) {

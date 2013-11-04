@@ -88,7 +88,7 @@ public class PivotTable {
 	}
 	
 	public void setTargetSheet(String name) {
-		setTargetSheet(new TableSheet(0, name));
+		setTargetSheet(0, name);
 	}
 	
 	public void setTargetSheet(int index, String name) {

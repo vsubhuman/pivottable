@@ -6,6 +6,8 @@ public class Test {
 
 	public static void main(String[] args) throws Exception {
 		
+		System.out.println("start");
+		
 		PivotTable table = new PivotTable();
 		table.setSourceDocument(DocumentFormat.XLSX, "table_b.xlsx");
 		table.setTargetDocument(DocumentFormat.XLSX, "table_b1.xlsx");
@@ -35,8 +37,14 @@ public class Test {
 		
 		table.addField(new FormulaField(formula, "WOI.", "0.00")).setColumnWidth(50);
 		
-		PivotTableConverter.convert(table);
+		System.out.println("table created");
 		
-		System.out.println(1);
+//		PivotTableConverter.convert(table);
+		
+		System.out.println("table converted");
+		
+		new XMLProvider().saveConfiguration("table.xml", table);
+		
+		System.out.println("exported");
 	}
 }

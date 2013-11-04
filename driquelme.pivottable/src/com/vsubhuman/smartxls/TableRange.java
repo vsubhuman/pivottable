@@ -57,6 +57,9 @@ public class TableRange {
 		return new StringBuilder(cell1).append(':').append(cell2).toString();
 	}
 	
+	/*
+	 * If isCells = false can call with wb = null!
+	 */
 	public static TableRange createRange(WorkBook wb) throws Exception {
 		
 		int lastRow = wb.getLastRow();
