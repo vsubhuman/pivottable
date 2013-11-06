@@ -1,6 +1,6 @@
 package com.vsubhuman.smartxls;
 
-import java.util.Collections;
+import java.util.Collections; 
 import java.util.Comparator;
 import java.util.List;
 
@@ -10,12 +10,58 @@ import com.smartxls.BookPivotRange;
 import com.smartxls.BookPivotRangeModel;
 import com.smartxls.WorkBook;
 import com.smartxls.enums.PivotBuiltInStyles;
+import com.vsubhuman.smartxls.SizeUnit.Size;
 
+/**
+ * <p>Class provides functionality to convert specified existing {@link WorkBook}
+ * by the rules described in the specified {@link PivotField}.</p>
+ * 
+ * <p>Also provides functionality to use {@link Document} settings from {@link PivotTable}
+ * to automatically read source document and write target document.</p>
+ * 
+ * @author vsubhuman
+ * @version 1.0
+ */
 public class PivotTableConverter {
 
-	public static final int WIDTH_MILTIPLIER = 37;
+	/**
+	 * <p>Convert documents using configuration of the specified {@link PivotTable}.
+	 * Opens document described as source document of the table, converts it
+	 * and writes it into the document described as target document of the table.</p>
+	 * 
+	 * <p><b>Note:</b> source and target documents required to be set in the table.</p>
+	 * 
+	 * @param table - {@link PivotTable} to use converting configuration from
+	 * @return {@link WorkBook} read from source document and converted by specified configuration
+	 * @throws IllegalStateException if source or target document is <code>null</code> 
+	 * @throws Exception if read, converting, or write process has failed
+	 * @since 1.0
+	 */
+	public static WorkBook convert(PivotTable table) throws IllegalStateException, Exception {
+		
+		return convert(table, true);
+	}
 	
-	public static WorkBook convert(PivotTable table) throws Exception {
+	/**
+	 * <p>Convert documents using configuration of the specified {@link PivotTable}.
+	 * Opens document described as source document of the table and converts it.
+	 * If writeTarget parameter is <code>true</code> - writes converted state
+	 * into the document described as target document of the table.</p>
+	 * 
+	 * <p><b>Note:</b> source document required to be set in the table.
+	 * If writeTarget parameter is <code>true</code> - target document
+	 * is also required.</p>
+	 * 
+	 * @param table - {@link PivotTable} to use converting configuration from
+	 * @param writeTarget - if <code>true</code> converted state will be saved into
+	 * target document from table
+	 * @return {@link WorkBook} read from source document and converted by specified configuration
+	 * @throws IllegalStateException if source document is <code>null</code> or if writeTarget
+	 * parameter is <code>true</code> and target document is <code>null</code>
+	 * @throws Exception if read, converting, or write process has failed
+	 * @since 1.0
+	 */
+	public static WorkBook convert(PivotTable table, boolean writeTarget) throws IllegalStateException, Exception {
 		
 		if (table == null)
 			throw new IllegalArgumentException("Pivot table cannot be null!");
@@ -25,19 +71,33 @@ public class PivotTableConverter {
 		
 		if (sourceDocument == null)
 			throw new IllegalStateException(
-					"Cannot convert table without source settings!");
+					"Cannot convert table without source document settings!");
+		
+		if (writeTarget && targetDocument == null)
+			throw new IllegalStateException(
+					"Cannot write target without target document settings!");
 		
 		WorkBook wb = sourceDocument.read();
 		
 		convert(wb, table);
 		
-		if (targetDocument != null)
+		if (writeTarget)
 			targetDocument.write(wb);
 		
 		return wb;
 	}
 	
-	public static void convert(WorkBook source, PivotTable table) throws Exception {
+	/**
+	 * <p>Convert specified {@link WorkBook} by configuration described in specified
+	 * {@link PivotTable}.</p>
+	 * 
+	 * @param source - {@link WorkBook} to convert
+	 * @param table - {@link PivotTable} to use configuration from
+	 * @throws IllegalArgumentException - if either workbook or pivot table is <code>null</code>
+	 * @throws Exception - if converting process has failed
+	 * @since 1.0
+	 */
+	public static void convert(WorkBook source, PivotTable table) throws IllegalArgumentException, Exception {
 
 		if (source == null)
 			throw new IllegalArgumentException("Source workbook cannot be null!");
@@ -45,11 +105,19 @@ public class PivotTableConverter {
 		if (table == null)
 			throw new IllegalArgumentException("Pivot table cannot be null!");
 
+		/*
+		 * Source sheet
+		 */
+		
 		int sourceSheet = table.getSourceSheet();
 		if (sourceSheet >= 0)
 			source.setSheet(sourceSheet);
 		else
 			sourceSheet = source.getSheet();
+		
+		/*
+		 * Source range
+		 */
 		
 		TableRange sourceRange = table.getSourceRange();
 		if (sourceRange == null)
@@ -57,9 +125,17 @@ public class PivotTableConverter {
 		
 		String range = sourceRange.getRange(source);
 		
+		/*
+		 * Create model
+		 */
+		
 		BookPivotRangeModel pmodel = source.getPivotModel();
 		pmodel.setList(range);
 
+		/*
+		 * Target cell
+		 */
+		
 		TableCell targetCell = table.getTargetCell();
 		
 		int targetRow = 0, targetCol = 0;
@@ -87,11 +163,19 @@ public class PivotTableConverter {
 		
 		pmodel.setLocation(0, targetRow, targetCol);
 
+		/*
+		 * Sheet name
+		 */
+		
 		String name = table.getName();
 		if (name != null) {
 			source.setSheetName(0, name);
 		}
 
+		/*
+		 * Range parameters
+		 */
+		
 		source.setSelection(targetRow, targetCol, targetRow, targetCol);
 
 		BookPivotRange prange = pmodel.getActivePivotRange();
@@ -109,12 +193,12 @@ public class PivotTableConverter {
 		if (style != null)
 			prange.setTableStyle(style);
 		
-		List<PivotField> fields = table.getFields();
-		Collections.sort(fields, COMPARE_BY_AREA);
-		
 		/*
 		 * Fields
 		 */
+		
+		List<PivotField> fields = table.getFields();
+		Collections.sort(fields, COMPARE_BY_AREA);
 		
 		PivotArea lastArea = null;
 		BookPivotArea parea = null;
@@ -214,9 +298,9 @@ public class PivotTableConverter {
 			}
 			
 			lastAddedArea = newArea;
-			
-			int width = f.getColumnWidth();
-			if (width < 0)
+
+			Size width = f.getColumnWidth();
+			if (width == null)
 				continue;
 
 			int startColumn = column;
@@ -228,7 +312,7 @@ public class PivotTableConverter {
 			while (startColumn <= lastColumn) {
 			
 				int oldWidth = source.getColWidth(startColumn);
-				int newWidth = width * WIDTH_MILTIPLIER;
+				int newWidth = width.getActualSize();
 				if (!widthChanged[startColumn] || newWidth > oldWidth) {
 					
 					source.setColWidth(startColumn, newWidth);
@@ -242,7 +326,11 @@ public class PivotTableConverter {
 			}
 		}
 	}
-	
+
+	/**
+	 * Compares pivot fields by area they meant to be put into.
+	 * @since 1.0
+	 */
 	public static final Comparator<PivotField> COMPARE_BY_AREA =
 		new Comparator<PivotField>() {
 	

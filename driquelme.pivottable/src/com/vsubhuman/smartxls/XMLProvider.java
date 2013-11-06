@@ -21,24 +21,46 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import com.smartxls.enums.PivotBuiltInStyles;
+import com.vsubhuman.smartxls.SizeUnit.Size;
 import com.vsubhuman.xml.ElementIterator;
 
+/**
+ * <p>Implementation of {@link ConfigurationProvider} that uses
+ * XML as a format of data saving.</p>
+ * 
+ * <p>Provides functionality to save state of a {@link PivotTable} into XML file
+ * or a stream, or load state of the table from XML file (stream).</p>
+ * 
+ * <p>To store fields state class uses system of "fields providers".
+ * You can implements your own field provider, in case you implements
+ * your own pivot fields. Provider should extend class {@link XMLFieldProvider}
+ * and can be registered in this provider by the name of the represented class.
+ * See methods: {@link #putFieldProvider(Class, XMLFieldProvider)},
+ * {@link #getFieldProvider(Class)}, {@link #removeFieldProvider(Class)}.</p>
+ * 
+ * @author vsubhuman
+ * @version 1.0
+ */
 public class XMLProvider implements ConfigurationProvider {
 
+	/*
+	 * Constants with names of the elements and attributes for XML 
+	 */
+	
 	public static final String EL_ROOT = "table";
 	public static final String EL_DOCUMENT = "document";
 	public static final String EL_FIELD = "field";
 	
 	public static final String AT_SOURCE_SHEET = "source-sheet";
+	
 	public static final String AT_SOURCE_RANGE = "source-range";
 	public static final String AT_SOURCE_RANGE_START = "source-range-start";
 	public static final String AT_SOURCE_RANGE_END = "source-range-end";
+	
 	public static final String AT_CELL_ROW = "-row";
 	public static final String AT_CELL_COL = "-col";
 	
-	public static final String AT_TARGET_SHEET = "target-sheet";
 	public static final String AT_TARGET_NAME = "target-name";
-	
 	public static final String AT_TARGET_SHOW_GRID = "target-show-grid";
 	public static final String AT_TARGET_SHOW_OUTLINES = "target-show-outlines";
 	public static final String AT_TARGET_SHOW_ROWCOLHEADER = "target-show-rowcolheader";
@@ -65,38 +87,82 @@ public class XMLProvider implements ConfigurationProvider {
 	public static final String VA_TYPE_SOURCE = "source"; 
 	public static final String VA_TYPE_TARGET = "target"; 
 	
+	
+	// providers for the fields
 	private Map<String, XMLFieldProvider> providers =
 			new HashMap<String, XMLFieldProvider>();
 	
+	/**
+	 * Creates new instance of the XML provider.
+	 * @since 1.0
+	 */
 	public XMLProvider() {
 		
-		putFieldProvider(new XMLFieldProvider());
-		putFieldProvider(new XMLRowFieldProvider());
-		putFieldProvider(new XMLDataFieldProvider());
-		putFieldProvider(new XMLFormulaFieldProvider());
+		/*
+		 * Put default field providers
+		 */
+		
+		putFieldProvider(PivotField.class, new XMLFieldProvider());
+		putFieldProvider(RowField.class, new XMLRowFieldProvider());
+		putFieldProvider(DataField.class, new XMLDataFieldProvider());
+		putFieldProvider(FormulaField.class, new XMLFormulaFieldProvider());
 	}
 	
-	public void putFieldProvider(XMLFieldProvider provider) {
-
-		Class<? extends PivotField> type = provider.getType();
+	/**
+	 * Register specified xml field provider by specified type.
+	 * 
+	 * @param type - type of the provided field
+	 * @param provider - field provider
+	 * @since 1.0
+	 */
+	public void putFieldProvider(Class<? extends PivotField> type, XMLFieldProvider provider) {
+		
 		providers.put(type.getCanonicalName(), provider);
 	}
 	
+	/**
+	 * Get xml field provider registered by specified pivot field type
+	 * 
+	 * @param type - type of the provided field
+	 * @return {@link XMLFieldProvider} registered by specified type,
+	 * or <code>null</code> if no provider is registered for specified type
+	 * @since 1.0
+	 */
 	public XMLFieldProvider getFieldProvider(Class<? extends PivotField> type) {
 
 		return providers.get(type.getCanonicalName());
 	}
 	
+	/**
+	 * Remove xml field provider registered for specified pivot field type
+	 * 
+	 * @param type - type of the provided field
+	 * @return {@link XMLFieldProvider} removed from this instance,
+	 * or <code>null</code> if no provider has been registered for specified type
+	 * @since 1.0
+	 */
 	public XMLFieldProvider removeFieldProvider(Class<? extends PivotField> type) {
 		
 		return providers.remove(type.getCanonicalName());
 	}
 	
+	/**
+	 * Saves state of the specified table into file by specified filepath as XML document.
+	 * 
+	 * @throws Exception if state writing or file writing process has failed
+	 * @since 1.0
+	 */
 	public boolean saveConfiguration(String path, PivotTable table) throws Exception {
 
 		return saveConfiguration(new File(path), table);
 	}
 	
+	/**
+	 * Saves state of the specified table into specified file as XML document.
+	 * 
+	 * @throws Exception if state writing or file writing process has failed
+	 * @since 1.0
+	 */
 	public boolean saveConfiguration(File file, PivotTable table) throws Exception {
 
 		FileOutputStream fos = null;
@@ -114,6 +180,11 @@ public class XMLProvider implements ConfigurationProvider {
 		}
 	}
 	
+	/**
+	 * Saves state of the specified table into specified stream as XML output.
+	 * 
+	 * @since 1.0
+	 */
 	@Override
 	public boolean saveConfiguration(OutputStream os, PivotTable table) throws Exception {
 
@@ -238,7 +309,7 @@ public class XMLProvider implements ConfigurationProvider {
 		/*
 		 * Save document
 		 */
-		
+
 		TransformerFactory tf = TransformerFactory.newInstance();
 		Transformer transformer = tf.newTransformer();
 		
@@ -250,6 +321,9 @@ public class XMLProvider implements ConfigurationProvider {
 		return true;
 	}
 	
+	/*
+	 * Exports specified table cell into specified Element by specified name
+	 */
 	private static void exportCell(Element e, String name, TableCell cell) throws Exception {
 		
 		if (cell.isNumbers()) {
@@ -263,6 +337,10 @@ public class XMLProvider implements ConfigurationProvider {
 		}
 	}
 	
+	/*
+	 * Creates element for the specified document, exports document data into it and places
+	 * element into specified parent element
+	 */
 	private static void exportDocument(Document d, Element parent, String type, com.vsubhuman.smartxls.Document doc) {
 		
 		if (doc == null)
@@ -287,11 +365,25 @@ public class XMLProvider implements ConfigurationProvider {
 		parent.appendChild(e);
 	}
 
+	/**
+	 * Loads table configuration from file by specified filepath as XML document
+	 * 
+	 * @throws Exception if file reading or configuration loading
+	 * process has failed
+	 * @since 1.0
+	 */
 	public PivotTable loadConfiguration(String path) throws Exception {
 		
 		return loadConfiguration(new File(path));
 	}
 	
+	/**
+	 * Loads table configuration from specified file as XML document
+	 * 
+	 * @throws Exception if file reading or configuration loading
+	 * process has failed
+	 * @since 1.0
+	 */
 	public PivotTable loadConfiguration(File file) throws Exception {
 		
 		FileInputStream fis = null;
@@ -309,6 +401,11 @@ public class XMLProvider implements ConfigurationProvider {
 		}
 	}
 	
+	/**
+	 * Loads table configuration from specified stream as XML document
+	 * 
+	 * @since 1.0
+	 */
 	@Override
 	public PivotTable loadConfiguration(InputStream is) throws Exception {
 
@@ -439,11 +536,14 @@ public class XMLProvider implements ConfigurationProvider {
 		return table;
 	}
 
+	/*
+	 * Parses document from specified element
+	 */
 	private com.vsubhuman.smartxls.Document parseDocument(Element e, String type) {
 
 		if (!e.hasAttribute(AT_DOCUMENT_FORMAT) || !e.hasAttribute(AT_DOCUMENT_PATH))
 			throw new IllegalStateException(
-				"Format of path is missing for the document type: '" + type + "'!");
+				"Format or path is missing for the document type: '" + type + "'!");
 		
 		DocumentFormat format = parseEnum(AT_DOCUMENT_FORMAT,
 				e.getAttribute(AT_DOCUMENT_FORMAT), DocumentFormat.class);
@@ -459,6 +559,9 @@ public class XMLProvider implements ConfigurationProvider {
 		return doc;
 	}
 	
+	/*
+	 * Parses table range from specified element
+	 */
 	private static TableRange parseTableRange(Element e) {
 		
 		if (e.hasAttribute(AT_SOURCE_RANGE)) {
@@ -479,6 +582,9 @@ public class XMLProvider implements ConfigurationProvider {
 		return null;
 	}
 	
+	/*
+	 * Parses table cell from specified element
+	 */
 	private static TableCell parseTableCell(Element e, String name) {
 		
 		if (e.hasAttribute(name)) {
@@ -505,27 +611,60 @@ public class XMLProvider implements ConfigurationProvider {
 		
 		return null;
 	}
-	
+
+	/**
+	 * Provides functionality to export specified pivot fields
+	 * of specific kind into specified {@link Element}. Or to
+	 * load specific kind of field from specified element.
+	 * 
+	 * @author vsubhuman
+	 * @version 1.0
+	 * @since 1.0
+	 */
 	public static class XMLFieldProvider {
+		
+		/*
+		 * Constant names of the XML elements and attributes
+		 */
 		
 		public static final String AT_AREA = "area";
 		public static final String AT_SOURCE = "source";
 		public static final String AT_SORT = "sort";
 		public static final String AT_WIDTH = "width";
+		public static final String AT_WIDTH_UNIT = "width-unit";
 		
-		public Class<? extends PivotField> getType() {
+		/**
+		 * Exports specified {@link PivotField} into specified {@link Element}.
+		 * 
+		 * @param field - field to export state of
+		 * @param e - element to export state of the field into
+		 * @since 1.0
+		 */
+		public void exportField(PivotField field, Element e) {
 			
-			return PivotField.class;
+			exportField(field, e, true);
 		}
 		
-		public void exportField(PivotField field, Element e) {
+		/**
+		 * Exports specified {@link PivotField} into specified {@link Element}.
+		 * Exports area info only if exportArea parameter if <code>true</code>.
+		 * Can be used by children classes, that exports kinds of fields with
+		 * static area info.
+		 * 
+		 * @param field - field to export state of
+		 * @param e - element to export state of the field into
+		 * @param exportArea - if <code>false</code> info about {@link PivotArea}
+		 * will not be exported
+		 * @since 1.0
+		 */
+		protected void exportField(PivotField field, Element e, boolean exportArea) {
 			
 			PivotArea area = field.getPivotArea();
 			String source = field.getSource();
 			SortType sort = field.getSortType();
-			int width = field.getColumnWidth();
+			Size width = field.getColumnWidth();
 			
-			if (area != null)
+			if (exportArea && area != null)
 				e.setAttribute(AT_AREA, area.toString());
 			
 			if (source != null)
@@ -534,15 +673,30 @@ public class XMLProvider implements ConfigurationProvider {
 			if (sort != null)
 				e.setAttribute(AT_SORT, sort.toString());
 			
-			if (width >= 0)
-				e.setAttribute(AT_WIDTH, String.valueOf(width));
+			if (width != null) {
+				
+				SizeUnit unit = width.getUnit();
+				if (unit != null)
+					e.setAttribute(AT_WIDTH_UNIT, unit.toString());
+				
+				e.setAttribute(AT_WIDTH, String.valueOf(width.getSize()));
+			}
 		}
 		
+		/**
+		 * Imports state of the {@link PivotField} from specified
+		 * element.
+		 * 
+		 * @param e - element to import state if the field from
+		 * @return {@link PivotField} exported from specified element
+		 * @since 1.0
+		 */
 		public PivotField importField(Element e) {
 
 			String areaStr = e.getAttribute(AT_AREA).trim();
 			String sortStr = e.getAttribute(AT_SORT).trim();
 			String widthStr = e.getAttribute(AT_WIDTH).trim();
+			String widthUnitStr = e.getAttribute(AT_WIDTH_UNIT).trim();
 
 			String source = null;
 			if (e.hasAttribute(AT_SOURCE))
@@ -560,29 +714,39 @@ public class XMLProvider implements ConfigurationProvider {
 			if (!widthStr.isEmpty()) {
 
 				int width = parseInteger(AT_WIDTH, widthStr);
-				f.setColumnWidth(width);
+				
+				SizeUnit unit = null;
+				if (!widthUnitStr.isEmpty())
+					unit = parseEnum(AT_WIDTH_UNIT, widthUnitStr, SizeUnit.class);
+				
+				f.setColumnWidth(unit, width);
 			}
 			
 			return f;
 		}
 	}
 	
+	/**
+	 * Instance of the {@link XMLFieldProvider} for the {@link RowField} type.
+	 * 
+	 * @author vsubhuman
+	 * @version 1.0
+	 * @since 1.0
+	 */
 	public static class XMLRowFieldProvider extends XMLFieldProvider {
+
+		/*
+		 * Constant names of the XML elements and attributes
+		 */
 		
 		public static final String AT_OUTLINE = "outline";
 		public static final String AT_COMPACT = "compact";
 		public static final String AT_SUBTOTALTOP = "subtotaltop";
 		
 		@Override
-		public Class<? extends RowField> getType() {
-			
-			return RowField.class;
-		}
-		
-		@Override
 		public void exportField(PivotField field, Element e) {
 			
-			super.exportField(field, e);
+			super.exportField(field, e, false);
 			
 			RowField rf = (RowField) field;
 			
@@ -617,6 +781,13 @@ public class XMLProvider implements ConfigurationProvider {
 		}
 	}
 	
+	/**
+	 * Instance of the {@link XMLFieldProvider} for the {@link DataField} type.
+	 * 
+	 * @author vsubhuman
+	 * @version 1.0
+	 * @since 1.0
+	 */
 	public static class XMLDataFieldProvider extends XMLFieldProvider {
 		
 		public static final String AT_NAME = "name";
@@ -624,15 +795,9 @@ public class XMLProvider implements ConfigurationProvider {
 		public static final String AT_SUM_TYPE = "sum-type";
 		
 		@Override
-		public Class<? extends DataField> getType() {
-			
-			return DataField.class;
-		}
-		
-		@Override
 		public void exportField(PivotField field, Element e) {
 			
-			super.exportField(field, e);
+			super.exportField(field, e, false);
 			
 			DataField df = (DataField) field;
 			
@@ -673,13 +838,14 @@ public class XMLProvider implements ConfigurationProvider {
 		}
 	}
 	
+	/**
+	 * Instance of the {@link XMLFieldProvider} for the {@link FormulaField} type.
+	 * 
+	 * @author vsubhuman
+	 * @version 1.0
+	 * @since 1.0
+	 */
 	public static class XMLFormulaFieldProvider extends XMLDataFieldProvider {
-		
-		@Override
-		public Class<? extends FormulaField> getType() {
-			
-			return FormulaField.class;
-		}
 		
 		@Override
 		public void exportField(PivotField field, Element e) {
@@ -712,6 +878,10 @@ public class XMLProvider implements ConfigurationProvider {
 		}
 	}
 	
+	/*
+	 * Parses integer value from the specified string
+	 * or throws an exception
+	 */
 	private static int parseInteger(String name, String value) {
 		
 		value = value.trim();
@@ -727,6 +897,10 @@ public class XMLProvider implements ConfigurationProvider {
 		}
 	}
 	
+	/*
+	 * Parses boolean value from the specified string
+	 * or throws an exception
+	 */
 	private static boolean parseBoolean(String name, String value) {
 		
 		value = value.trim();
@@ -741,6 +915,10 @@ public class XMLProvider implements ConfigurationProvider {
 			"Illegal value for boolean attribute '" + name + "': " + value + "! Expected: true/false/yes/no");
 	}
 	
+	/*
+	 * Parses enum value of the specified type from the specified string
+	 * or throws an exception
+	 */
 	private static <T extends Enum<T>> T parseEnum(String name, String value, Class<T> type) {
 
 		value = value.trim();
