@@ -152,7 +152,7 @@ public class PivotField {
 	 * 
 	 * @param unit - unit of column width
 	 * @param columnWidth - number of units
-	 * @see #setColumnWidth(Size)
+	 * @see #setColumnWidth(SizeUnit.Size)
 	 * @see SizeUnit
 	 */
 	public void setColumnWidth(SizeUnit unit, int columnWidth) {
@@ -163,7 +163,7 @@ public class PivotField {
 	 * Sets new width of the column to the specified number of pixels.
 	 * 
 	 * @param columnWidth - width of the column in pixels
-	 * @see #setColumnWidth(Size)
+	 * @see #setColumnWidth(SizeUnit.Size)
 	 * @see #setColumnWidth(SizeUnit, int)
 	 * @see SizeUnit#PIXEL
 	 */
@@ -175,7 +175,7 @@ public class PivotField {
 	 * Sets new width of the column to the specified number of points.
 	 * 
 	 * @param columnWidth - width of the column in points
-	 * @see #setColumnWidth(Size)
+	 * @see #setColumnWidth(SizeUnit.Size)
 	 * @see #setColumnWidth(SizeUnit, int)
 	 * @see SizeUnit#POINT
 	 */
