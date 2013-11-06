@@ -1,6 +1,14 @@
-package com.vsubhuman.smartxls;
 
 import com.smartxls.enums.PivotBuiltInStyles;
+import com.vsubhuman.smartxls.DataField;
+import com.vsubhuman.smartxls.DocumentFormat;
+import com.vsubhuman.smartxls.FormulaField;
+import com.vsubhuman.smartxls.PivotArea;
+import com.vsubhuman.smartxls.PivotField;
+import com.vsubhuman.smartxls.PivotTable;
+import com.vsubhuman.smartxls.PivotTableConverter;
+import com.vsubhuman.smartxls.RowField;
+import com.vsubhuman.smartxls.XMLProvider;
 
 public class Test {
 
@@ -9,28 +17,28 @@ public class Test {
 		System.out.println("start");
 		
 		XMLProvider prov = new XMLProvider();
-		
 //		PivotTable table = prov.loadConfiguration("table.xml"); 
 //		System.out.println("imported");
 		
 		PivotTable table = createTable();
 		System.out.println("table created");
-		
+
 		PivotTableConverter.convert(table);
 		System.out.println("table converted");
 		
-//		prov.saveConfiguration("table.xml", table);
-//		System.out.println("exported");
+		prov.saveConfiguration("table.xml", table);
+		System.out.println("exported");
 	}
 	
 	private static PivotTable createTable() {
+
+		PivotTable table = new PivotTable("PIVOT TABLE");
 		
-		PivotTable table = new PivotTable();
+		table.setStyle(PivotBuiltInStyles.PivotStyleMedium4);
+		
+		
 		table.setSourceDocument(DocumentFormat.XLSX, "table.xlsx");
 		table.setTargetDocument(DocumentFormat.XLSX, "table1.xlsx");
-		
-		table.setName("PIVOT TABLE");
-		table.setStyle(PivotBuiltInStyles.PivotStyleMedium4);
 
 		table.addField(new PivotField(PivotArea.PAGE, "Points"));
 		

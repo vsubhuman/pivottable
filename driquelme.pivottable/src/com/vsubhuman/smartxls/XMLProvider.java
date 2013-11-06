@@ -12,15 +12,13 @@ import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import com.smartxls.enums.PivotBuiltInStyles;
+import com.sun.org.apache.xml.internal.serialize.OutputFormat;
+import com.sun.org.apache.xml.internal.serialize.XMLSerializer;
 import com.vsubhuman.smartxls.SizeUnit.Size;
 import com.vsubhuman.xml.ElementIterator;
 
@@ -310,13 +308,21 @@ public class XMLProvider implements ConfigurationProvider {
 		 * Save document
 		 */
 
-		TransformerFactory tf = TransformerFactory.newInstance();
-		Transformer transformer = tf.newTransformer();
+		OutputFormat of = new OutputFormat(doc);
+		of.setLineWidth(65);
+		of.setIndenting(true);
+		of.setIndent(2);
+
+		XMLSerializer serializer = new XMLSerializer(os, of);
+		serializer.serialize(doc);
 		
-		DOMSource source = new DOMSource(doc);
-		StreamResult stream = new StreamResult(os);
-		
-		transformer.transform(source, stream);
+//		TransformerFactory tf = TransformerFactory.newInstance();
+//		Transformer transformer = tf.newTransformer();
+//		
+//		DOMSource source = new DOMSource(doc);
+//		StreamResult stream = new StreamResult(os);
+//		
+//		transformer.transform(source, stream);
 		
 		return true;
 	}
