@@ -62,11 +62,6 @@ public class XMLProvider implements ConfigurationProvider {
 	public static final String AT_CELL_COL = "-col";
 	
 	public static final String AT_TARGET_NAME = "target-name";
-	public static final String AT_TARGET_SHOW_GRID = "target-show-grid";
-	public static final String AT_TARGET_SHOW_OUTLINES = "target-show-outlines";
-	public static final String AT_TARGET_SHOW_ROWCOLHEADER = "target-show-rowcolheader";
-	public static final String AT_TARGET_SHOW_ZEROVALUES = "target-show-zerovalues"; 
-	
 	public static final String AT_TARGET_CELL = "target-cell"; 
 	public static final String AT_STYLE = "style"; 
 	
@@ -75,15 +70,14 @@ public class XMLProvider implements ConfigurationProvider {
 	public static final String AT_SHOW_ROWBUTTONS = "show-rowbuttons";
 	public static final String AT_SHOW_TOTALCOL = "show-totalcol"; 
 	public static final String AT_SHOW_TOTALROW = "show-totalrow"; 
-	public static final String AT_DELETE_SOURCE_SHEET = "delete-source-sheet"; 
 	
 	public static final String AT_DATA_CAPTION = "show-totalrow"; 
 	
-	public static final String AT_TYPE = "type"; 
+	public static final String AT_TYPE = "type";
 	
-	public static final String AT_DOCUMENT_FORMAT = "format"; 
-	public static final String AT_DOCUMENT_PATH = "path"; 
-	public static final String AT_DOCUMENT_PASS = "pass"; 
+	public static final String AT_DOCUMENT_FORMAT = "format";
+	public static final String AT_DOCUMENT_PATH = "path";
+	public static final String AT_DOCUMENT_PASS = "pass";
 	
 	public static final String VA_TYPE_SOURCE = "source"; 
 	public static final String VA_TYPE_TARGET = "target"; 

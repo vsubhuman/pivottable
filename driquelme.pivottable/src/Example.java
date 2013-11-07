@@ -33,7 +33,6 @@ public class Example {
 		
 		table.setStyle(PivotBuiltInStyles.PivotStyleMedium4);
 		
-		
 		table.setSourceDocument(DocumentFormat.XLSX, "table.xlsx");
 		table.setTargetDocument(DocumentFormat.XLSX, "table1.xlsx");
 
